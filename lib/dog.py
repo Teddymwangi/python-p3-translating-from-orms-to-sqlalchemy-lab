@@ -1,22 +1,49 @@
-from models import Dog
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from lib.models import Base, Dog
 
-def create_table(base):
-    pass
+# Create engine
+engine = create_engine('sqlite:///dogs.db')
+Base.metadata.create_all(engine)
 
-def save(session, dog):
-    pass
+# Create session
+Session = sessionmaker(bind=engine)
+session = Session()
 
-def get_all(session):
-    pass
+def create_table():
+    """Create the table in the database."""
+    Base.metadata.create_all(engine)
 
-def find_by_name(session, name):
-    pass
+def save(dog):
+    """Save a dog object to the database."""
+    session.add(dog)
+    session.commit()
 
-def find_by_id(session, id):
-    pass
+def read(id):
+    """Read a dog object from the database by ID."""
+    return session.query(Dog).filter_by(id=id).first()
 
-def find_by_name_and_breed(session, name, breed):
-    pass
+def update(id, name=None, breed=None, age=None):
+    """Update a dog object in the database."""
+    dog = read(id)
+    if dog:
+        if name:
+            dog.name = name
+        if breed:
+            dog.breed = breed
+        if age:
+            dog.age = age
+        session.commit()
+        return True
+    else:
+        return False
 
-def update_breed(session, dog, breed):
-    pass
+def delete(id):
+    """Delete a dog object from the database."""
+    dog = read(id)
+    if dog:
+        session.delete(dog)
+        session.commit()
+        return True
+    else:
+        return False
